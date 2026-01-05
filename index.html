@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مدیریت کارهای حرفه‌ای</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="background-animations">
+        <div class="blob"></div>
+        <div class="blob"></div>
+        <div class="blob"></div>
+    </div>
+
+    <div class="container">
+        <div class="header-actions">
+            <div class="progress-container">
+                <svg class="progress-ring" width="50" height="50">
+                    <circle class="progress-ring__circle-bg" stroke="#e6e6e6" stroke-width="4" fill="transparent" r="20" cx="25" cy="25"/>
+                    <circle class="progress-ring__circle" stroke="var(--primary-color)" stroke-width="4" fill="transparent" r="20" cx="25" cy="25"/>
+                </svg>
+                <span id="progress-text">0%</span>
+            </div>
+            <button id="theme-btn" title="تغییر تم"><i class="fas fa-moon"></i></button>
+        </div>
+        
+        <header>
+            <h1>برنامه‌ریزی من</h1>
+            <p id="date-display"></p>
+        </header>
+
+        <section class="input-section">
+            <form id="todo-form">
+                <input type="text" id="todo-title" placeholder="عنوان کار..." required autocomplete="off">
+                <textarea id="todo-desc" placeholder="توضیحات (اختیاری)..." rows="2"></textarea>
+                <button type="submit" id="add-btn">افزودن تسک <i class="fas fa-plus"></i></button>
+            </form>
+        </section>
+
+        <section class="filter-section">
+            <button class="filter-btn active" data-filter="all">همه (0)</button>
+            <button class="filter-btn" data-filter="active">جاری (0)</button>
+            <button class="filter-btn" data-filter="completed">انجام شده (0)</button>
+        </section>
+
+        <ul id="todo-list"></ul>
+
+        <footer class="stats">
+            <span id="items-left">0 مورد باقی مانده</span>
+            <button id="clear-completed">پاکسازی انجام شده‌ها</button>
+        </footer>
+    </div>
+
+    <div id="edit-modal" class="modal">
+        <div class="modal-content">
+            <h2>ویرایش تسک</h2>
+            <input type="text" id="modal-title">
+            <textarea id="modal-desc" rows="4"></textarea>
+            <div class="modal-actions">
+                <button id="save-modal" class="save-btn">ذخیره</button>
+                <button id="close-modal" class="cancel-btn">انصراف</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="js/app.js" type="module"></script>
+</body>
+</html>
