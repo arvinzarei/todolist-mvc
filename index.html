@@ -27,14 +27,14 @@
         </div>
         
         <header>
-            <h1>برنامه‌ریزی من</h1>
+            <h1>مدیریت کارهای روزانه</h1>
             <p id="date-display"></p>
         </header>
 
         <section class="input-section">
             <form id="todo-form">
                 <input type="text" id="todo-title" placeholder="عنوان کار..." required autocomplete="off">
-                <textarea id="todo-desc" placeholder="توضیحات (اختیاری)..." rows="2"></textarea>
+                <textarea id="todo-desc" class="no-resize" placeholder="توضیحات (اختیاری)..." rows="2"></textarea>
                 <button type="submit" id="add-btn">افزودن تسک <i class="fas fa-plus"></i></button>
             </form>
         </section>
@@ -56,17 +56,40 @@
     <div id="edit-modal" class="modal">
         <div class="modal-content">
             <h2>ویرایش تسک</h2>
-            <input type="text" id="modal-title">
-            <textarea id="modal-desc" rows="4"></textarea>
+            <div class="modal-body">
+                <input type="text" id="modal-title" placeholder="عنوان...">
+                <textarea id="modal-desc" class="no-resize" rows="4" placeholder="توضیحات..."></textarea>
+            </div>
             <div class="modal-actions">
-                <button id="save-modal" class="save-btn">ذخیره</button>
+                <button id="save-modal" class="save-btn">ذخیره تغییرات</button>
                 <button id="close-modal" class="cancel-btn">انصراف</button>
             </div>
         </div>
     </div>
 
-    <div id="toast-container" class="toast-container"></div>
+    <div id="delete-confirm-modal" class="modal">
+        <div class="modal-content">
+            <div class="warn-icon"><i class="fas fa-trash-alt" style="color: var(--danger);"></i></div>
+            <p>آیا از حذف این تسک اطمینان دارید؟</p>
+            <div class="modal-actions">
+                <button id="confirm-delete-btn" class="save-btn" style="background: var(--danger);">حذف شود</button>
+                <button id="cancel-delete-btn" class="cancel-btn">انصراف</button>
+            </div>
+        </div>
+    </div>
 
+    <div id="clear-modal" class="modal">
+        <div class="modal-content">
+            <div class="warn-icon"><i class="fas fa-exclamation-triangle"></i></div>
+            <p>آیا از پاکسازی تمام تسک‌های انجام شده مطمئن هستید؟</p>
+            <div class="modal-actions">
+                <button id="confirm-clear" class="save-btn" style="background: var(--danger);">بله، پاک کن</button>
+                <button id="close-clear" class="cancel-btn">انصراف</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-container" class="toast-container"></div>
     <script src="js/app.js" type="module"></script>
 </body>
 </html>
