@@ -7,14 +7,12 @@ export default class View {
         this.itemsLeft = document.querySelector('#items-left');
         this.filterBtns = document.querySelectorAll('.filter-btn');
         this.clearBtn = document.querySelector('#clear-completed');
-        
         this.modal = document.querySelector('#edit-modal');
         this.modalTitle = document.querySelector('#modal-title');
         this.modalDesc = document.querySelector('#modal-desc');
         this.saveModalBtn = document.querySelector('#save-modal');
         this.closeModalBtn = document.querySelector('#close-modal');
         this.toastContainer = document.querySelector('#toast-container');
-        
         this.currentEditId = null;
     }
 
@@ -23,7 +21,6 @@ export default class View {
         toast.className = `toast ${type}`;
         toast.innerHTML = `<span>${message}</span>`;
         this.toastContainer.appendChild(toast);
-        
         setTimeout(() => {
             toast.style.opacity = '0';
             setTimeout(() => toast.remove(), 500);
@@ -32,18 +29,20 @@ export default class View {
 
     displayTodos(todosToShow, allTodos) {
         this.todoList.innerHTML = '';
-        
         todosToShow.forEach(todo => {
             const li = document.createElement('li');
             li.id = todo.id;
             li.className = `todo-item ${todo.completed ? 'completed' : ''}`;
             li.innerHTML = `
-                <input type="checkbox" ${todo.completed ? 'checked' : ''}>
                 <div class="todo-text-content">
                     <h3>${todo.title}</h3>
                     <p>${todo.description || ''}</p>
+                    <span class="todo-meta"><i class="far fa-clock"></i> ${todo.createdAt || ''}</span>
                 </div>
                 <div class="actions">
+                    <button class="complete-btn" title="تغییر وضعیت">
+                        <i class="${todo.completed ? 'fas fa-check-circle' : 'far fa-circle'}"></i>
+                    </button>
                     <button class="edit-btn"><i class="fas fa-edit"></i></button>
                     <button class="delete-btn"><i class="fas fa-trash"></i></button>
                 </div>
@@ -53,13 +52,11 @@ export default class View {
 
         const activeCount = allTodos.filter(t => !t.completed).length;
         this.itemsLeft.textContent = `${activeCount} مورد باقی مانده`;
-        
-        // آپدیت متن دکمه‌های فیلتر
         this.filterBtns.forEach(btn => {
-            const filter = btn.dataset.filter;
-            if (filter === 'all') btn.textContent = `همه (${allTodos.length})`;
-            if (filter === 'active') btn.textContent = `جاری (${activeCount})`;
-            if (filter === 'completed') btn.textContent = `انجام شده (${allTodos.length - activeCount})`;
+            const f = btn.dataset.filter;
+            if (f === 'all') btn.textContent = `همه (${allTodos.length})`;
+            if (f === 'active') btn.textContent = `جاری (${activeCount})`;
+            if (f === 'completed') btn.textContent = `انجام شده (${allTodos.length - activeCount})`;
         });
     }
 
@@ -68,33 +65,32 @@ export default class View {
             e.preventDefault();
             if (this.titleInput.value.trim()) {
                 handler(this.titleInput.value, this.descInput.value);
-                this.titleInput.value = ''; 
-                this.descInput.value = '';
+                this.titleInput.value = ''; this.descInput.value = '';
                 this.showToast('تسک جدید اضافه شد', 'success');
             }
         });
     }
 
     bindDeleteTodo(handler) {
+        const deleteModal = document.querySelector('#delete-confirm-modal');
+        let deleteId = null;
+
         this.todoList.addEventListener('click', e => {
             if (e.target.closest('.delete-btn')) {
-                const li = e.target.closest('.todo-item');
-                if (confirm('آیا از حذف مطمئن هستید؟')) {
-                    handler(Number(li.id));
-                    this.showToast('تسک حذف شد', 'delete');
-                }
+                deleteId = Number(e.target.closest('.todo-item').id);
+                deleteModal.classList.add('active');
             }
         });
-    }
 
-    bindToggleTodo(handler) {
-        this.todoList.addEventListener('change', e => {
-            if (e.target.type === 'checkbox') {
-                const id = Number(e.target.closest('.todo-item').id);
-                handler(id);
-                this.showToast('وضعیت تغییر کرد', 'info');
-            }
-        });
+        document.querySelector('#confirm-delete-btn').onclick = () => {
+            handler(deleteId);
+            deleteModal.classList.remove('active');
+            this.showToast('تسک با موفقیت حذف شد', 'delete');
+        };
+
+        document.querySelector('#cancel-delete-btn').onclick = () => {
+            deleteModal.classList.remove('active');
+        };
     }
 
     bindEditTodo(handler) {
@@ -107,13 +103,11 @@ export default class View {
                 this.modal.classList.add('active');
             }
         });
-
-        this.saveModalBtn.addEventListener('click', () => {
+        this.saveModalBtn.onclick = () => {
             handler(this.currentEditId, this.modalTitle.value, this.modalDesc.value);
             this.modal.classList.remove('active');
             this.showToast('تغییرات ذخیره شد', 'success');
-        });
-
-        this.closeModalBtn.addEventListener('click', () => this.modal.classList.remove('active'));
+        };
+        this.closeModalBtn.onclick = () => this.modal.classList.remove('active');
     }
 }
