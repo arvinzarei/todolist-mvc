@@ -1,39 +1,43 @@
 export default class Model {
     constructor() {
-        this.todos = [];
+        this.todos = JSON.parse(localStorage.getItem('todos')) || [];
         this.observers = [];
         this.apiUrL = 'http://localhost:3000/api/todos';
-        
-        // بارگذاری اولیه داده‌ها از سرور
         this.loadTodos();
     }
 
-    addObserver(observer) {
-        this.observers.push(observer);
-    }
+    addObserver(observer) { this.observers.push(observer); }
 
     notify() {
+        localStorage.setItem('todos', JSON.stringify(this.todos));
         this.observers.forEach(observer => observer(this.todos));
     }
 
-    // متد جدید برای خواندن دیتا از SQLite
     async loadTodos() {
         try {
             const response = await fetch(this.apiUrL);
-            this.todos = await response.json();
-            this.notify();
+            if(response.ok) {
+                this.todos = await response.json();
+                this.notify();
+            }
         } catch (error) {
-            console.error("خطا در بارگذاری داده‌ها:", error);
+            console.log("Using Local Storage mode.");
+            this.notify();
         }
     }
 
     async addTodo(title, description) {
+        const now = new Date();
         const newTodo = {
             id: Date.now(),
             title,
             description: description || '',
-            completed: false
+            completed: false,
+            createdAt: now.toLocaleDateString('fa-IR') + ' ' + now.toLocaleTimeString('fa-IR', {hour: '2-digit', minute:'2-digit'})
         };
+
+        this.todos.push(newTodo);
+        this.notify();
 
         try {
             await fetch(this.apiUrL, {
@@ -41,70 +45,48 @@ export default class Model {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(newTodo)
             });
-            this.todos.push(newTodo);
-            this.notify();
-        } catch (error) {
-            console.error("خطا در ذخیره تسک:", error);
-        }
+        } catch (e) {}
     }
 
     async editTodo(id, updatedTitle, updatedDesc) {
-        const todo = this.todos.find(t => t.id === id);
-        const updatedData = { 
-            title: updatedTitle, 
-            description: updatedDesc, 
-            completed: todo.completed 
-        };
-
+        this.todos = this.todos.map(t => t.id === id ? { ...t, title: updatedTitle, description: updatedDesc } : t);
+        this.notify();
         try {
             await fetch(`${this.apiUrL}/${id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(updatedData)
+                body: JSON.stringify(this.todos.find(t => t.id === id))
             });
-            this.todos = this.todos.map(t => t.id === id ? { ...t, ...updatedData } : t);
-            this.notify();
-        } catch (error) {
-            console.error("خطا در ویرایش:", error);
-        }
+        } catch(e){}
     }
 
     async deleteTodo(id) {
+        this.todos = this.todos.filter(t => t.id !== id);
+        this.notify();
         try {
             await fetch(`${this.apiUrL}/${id}`, { method: 'DELETE' });
-            this.todos = this.todos.filter(t => t.id !== id);
-            this.notify();
-        } catch (error) {
-            console.error("خطا در حذف:", error);
-        }
+        } catch(e){}
     }
 
     async toggleTodo(id) {
-        const todo = this.todos.find(t => t.id === id);
-        const updatedData = { 
-            title: todo.title, 
-            description: todo.description, 
-            completed: !todo.completed 
-        };
-
+        this.todos = this.todos.map(t => t.id === id ? { ...t, completed: !t.completed } : t);
+        this.notify();
         try {
+            const todo = this.todos.find(t => t.id === id);
             await fetch(`${this.apiUrL}/${id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(updatedData)
+                body: JSON.stringify(todo)
             });
-            this.todos = this.todos.map(t => t.id === id ? { ...t, ...updatedData } : t);
-            this.notify();
-        } catch (error) {
-            console.error("خطا در تغییر وضعیت:", error);
-        }
+        } catch(e){}
     }
 
     async clearCompleted() {
-        // برای سادگی، تک‌تک تسک‌های انجام شده را حذف می‌کنیم
-        const completedTodos = this.todos.filter(t => t.completed);
-        for (const todo of completedTodos) {
-            await this.deleteTodo(todo.id);
+        const toDelete = this.todos.filter(t => t.completed);
+        this.todos = this.todos.filter(t => !t.completed);
+        this.notify();
+        for(const t of toDelete) {
+            try { await fetch(`${this.apiUrL}/${t.id}`, { method: 'DELETE' }); } catch(e){}
         }
     }
 }
